@@ -47,7 +47,71 @@
 
   <script>
       // Write your code here or create a separate .js file if you prefer
+      const apiKey = '1251fb4b'; // Replace with your actual API key
+const searchForm = document.getElementById('searchForm');
+const searchResults = document.getElementById('searchResults');
 
+searchForm.addEventListener('submit', async (event) => {
+  event.preventDefault(); // Prevent form submission
+
+  const searchQuery = document.getElementById('searchQuery').value.trim();
+
+  if (!searchQuery) {
+    toastr.error('Please enter a movie title to search.');
+    return;
+  }
+
+  toastr.info('Searching for movies...');
+
+  try {
+    const response = await fetch(`http://www.omdbapi.com/?s=${searchQuery}&apikey=${apiKey}`);
+    const data = await response.json();
+
+    searchResults.innerHTML = ''; // Clear previous results
+
+    if (data.Search) {
+      const movies = data.Search;
+      movies.forEach(movie => {
+        const movieCard = createMovieCard(movie);
+        searchResults.appendChild(movieCard);
+      });
+      toastr.success('Movies found!');
+    } else {
+      toastr.error('No movies found for this query.');
+    }
+  } catch (error) {
+    console.error('Error fetching movies:', error);
+    toastr.error('An error occurred while searching.');
+  }
+});
+
+function createMovieCard(movie) {
+  const card = document.createElement('div');
+  card.classList.add('col-md-4', 'mb-4', 'movie');
+
+  const cardBody = document.createElement('div');
+  cardBody.classList.add('card-body');
+
+  const posterImg = document.createElement('img');
+  posterImg.classList.add('card-img-top');
+  posterImg.src = movie.Poster === 'N/A' ? 'https://via.placeholder.com/150x200' : movie.Poster; // Use placeholder if no poster available
+
+  const cardTitle = document.createElement('h3');
+  cardTitle.classList.add('card-title');
+  cardTitle.textContent = movie.Title;
+
+  const cardText = document.createElement('p');
+  cardText.classList.add('card-text');
+  cardText.innerHTML = `<b>Release Year:</b> ${movie.Year}<br><b>Type:</b> ${movie.Type}`;
+
+  cardBody.appendChild(posterImg);
+  cardBody.appendChild(cardTitle);
+  cardBody.appendChild(cardText);
+
+  card.appendChild(cardBody);
+
+  return card;
+}
   </script>
 
 </body>
